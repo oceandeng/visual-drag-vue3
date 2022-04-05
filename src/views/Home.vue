@@ -36,7 +36,7 @@ import { useStore } from "vuex";
 import ToolBar from "@/components/ToolBar.vue";
 import ComponentList from "@/components/ComponentsList.vue";
 import Editor from "@/components/editor/Index.vue";
-import RightSidebar from "@/components/RightSidebar.vue";
+import RightSidebar from "@/components/right-sidebar/Index.vue";
 
 import componentlist from "@/custom-components/component-list";
 import { deepCopy, generateID } from "@/utils/utils";
@@ -82,6 +82,7 @@ function handleDrop(e) {
         component.style.left = e.x - editorInfo.x;
         component.id = generateID();
         store.commit("component/addComponent", { component });
+        store.dispatch('snapshot/recordSnapshot')
     }
 }
 
@@ -95,12 +96,13 @@ function handleMouseDown() {
 }
 
 function deselectCurComponent(e) {
-    if (!isClickComponent) {
+    if (!isClickComponent.value) {
         store.commit("component/setCurComponent", { component: null, index: null });
     }
 
     // 0 左击 1 滚轮 2 右击
     if (e.button != 2) {
+        store.commit('contextmenu/hideContextmenu')
     }
 }
 

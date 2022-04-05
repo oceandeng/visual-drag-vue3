@@ -1,6 +1,6 @@
 <template>
     <div
-        ref="shape"
+        :ref="getShapeRef"
         class="shape"
         :class="active"
         @click="handleSelectCurComponent"
@@ -27,11 +27,12 @@
 import { defineProps, computed, ref, toRefs, onMounted } from "vue";
 import { useStore } from "vuex";
 import { RefreshRight, Lock } from "@element-plus/icons-vue";
+import eventBus from "@/utils/eventBus";
+import runAnimation from "@/utils/runAnimation";
 
-import Point from "./components/point.vue";
+import Point from "./components/Point.vue";
 
 const store = useStore();
-const shape = ref(null);
 
 const pointRef = ref(null);
 
@@ -56,13 +57,20 @@ const props = defineProps({
     },
 });
 
+const curComponent = computed(() => store.state.component.curComponent);
 const isActive = computed(() => props.active && !props.element.isLock);
 const { defaultStyle, element, index } = toRefs(props);
+
+let shapeRef = ref(null)
+function getShapeRef(el){
+    shapeRef.value = el
+}
 
 function handleSelectCurComponent(e) {
     // 阻止向父组件冒泡
     e.stopPropagation();
     e.preventDefault();
+    store.commit("contextmenu/hideContextmenu");
 }
 
 // 处理旋转
@@ -100,9 +108,10 @@ function handleRotate(e) {
     };
 
     const up = () => {
+        hasMove && store.dispatch("snapshot/recordSnapshot");
         document.removeEventListener("mousemove", move);
         document.removeEventListener("mouseup", up);
-        pointRef.value.updateCursor();
+        pointRef.value.updateCursor(true);
     };
 
     document.addEventListener("mousemove", move);
@@ -127,8 +136,10 @@ function handleMouseDownOnShape(e) {
     const startTop = Number(position.top);
     const startLeft = Number(position.left);
 
-    // 拖拽
-    const move = function (moveEvent) {
+    // 如果元素没有移动，则不保存快照
+    let hasMove = false;
+    const move = (moveEvent) => {
+        hasMove = true;
         const currentX = moveEvent.clientX;
         const currentY = moveEvent.clientY;
 
@@ -138,7 +149,8 @@ function handleMouseDownOnShape(e) {
         store.dispatch("public/setShapeStyle", position);
     };
 
-    const up = function () {
+    const up = () => {
+        hasMove && store.dispatch("snapshot/recordSnapshot");
         document.removeEventListener("mousemove", move);
         document.removeEventListener("mouseup", up);
     };
@@ -146,6 +158,17 @@ function handleMouseDownOnShape(e) {
     document.addEventListener("mousemove", move, false);
     document.addEventListener("mouseup", up, false);
 }
+
+onMounted(() => {
+    eventBus.on("runAnimation", () => {
+        if(element.value == curComponent.value){
+            runAnimation(shapeRef.value, curComponent.value.animations);
+        }
+    });
+    eventBus.on("stopAnimation", () => {
+        shapeRef.value.classList.remove("animated", "infinite");
+    });
+});
 </script>
 
 <style lang="scss" scoped>

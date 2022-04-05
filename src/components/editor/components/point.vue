@@ -9,12 +9,14 @@
 </template>
 
 <script setup>
-import { toRefs, reactive, defineProps, computed, watchEffect, defineExpose } from "vue";
+import { toRefs, reactive, defineProps, computed, watchEffect, defineExpose, getCurrentInstance } from "vue";
 import { useStore } from "vuex";
 
 import calculateComponentPositonAndSize from "@/utils/calculateComponentPositonAndSize";
 
 import { useGetCursor, useGetPointStyle } from "../core";
+
+const { ctx } = getCurrentInstance();
 
 const store = useStore();
 const curComponent = computed(() => store.state.component.curComponent);
@@ -47,10 +49,11 @@ function handleGetPointStyle(item) {
 }
 
 // 更新cursors
-function updateCursor() {
+function updateCursor(isForceUpdate) {
     if (curComponent.value) {
         cursors = getCursor(curComponent.value);
-        console.log(cursors, 111);
+        // 强制刷新
+        !!isForceUpdate && ctx.$forceUpdate();
     }
 }
 
@@ -116,10 +119,10 @@ function handleMouseDownOnPoint(point, e) {
         });
 
         store.commit("component/setShapeStyle", style);
-
     };
 
     const up = () => {
+        needSave && store.dispatch("snapshot/recordSnapshot");
         document.removeEventListener("mousemove", move);
         document.removeEventListener("mouseup", up);
     };

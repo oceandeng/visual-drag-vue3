@@ -1,3 +1,5 @@
+import { reactive } from "vue";
+
 export function deepCopy(target) {
     if (typeof target == "object") {
         const result = Array.isArray(target) ? [] : {};
@@ -23,5 +25,11 @@ export function generateID() {
 }
 
 export function $(element) {
-   return document.querySelector(element);
+    return document.querySelector(element);
+}
+
+export function swap(arr, i, j) {
+    const temp = arr[i]
+    arr[i] = reactive(arr[j])
+    arr[j] = reactive(temp)
 }

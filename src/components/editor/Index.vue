@@ -7,6 +7,7 @@
                 width: `${changeStyleWithScale(canvasStyleData.width, canvasStyleData.scale)}px`,
                 height: `${changeStyleWithScale(canvasStyleData.height, canvasStyleData.scale)}px`,
             }"
+            @contextmenu="handleContextmenu"
             @mousedown="handleMouseDown"
         >
             <!-- 网格线 -->
@@ -34,6 +35,7 @@
                     @input="handleInput(item)"
                 />
             </shape>
+            <contextmenu />
         </div>
     </div>
 </template>
@@ -44,6 +46,7 @@ import { useStore } from "vuex";
 
 import Grid from "./Grid.vue";
 import Shape from "./Shape.vue";
+import Contextmenu from "./components/ContextMenu.vue"
 
 import { changeStyleWithScale  } from "@/utils/translate";
 import { getStyle, setStyle } from '@/utils/style'
@@ -54,12 +57,33 @@ const store = useStore();
 const canvasStyleData = computed(() => store.state.public.canvasStyleData);
 const componentData = computed(() => store.state.component.componentData);
 const curComponent = computed(() => store.state.component.curComponent);
-const editor = computed(() => store.state.compose.editor)
+
+function handleContextmenu(e){
+    e.stopPropagation()
+    e.preventDefault()
+
+    // 计算菜单相对编辑器的位移
+    let target = e.target
+    let top = e.offsetY
+    let left = e.offsetX
+
+    while(target instanceof SVGElement){
+        target = target.parentNode
+    }
+
+    while(!target.className.includes('editor')){
+        left += target.offsetLeft
+        top += target.offsetTop
+        target = target.parentNode
+    }
+
+    store.commit('contextmenu/showContextmenu', {top, left})
+}
 
 function handleMouseDown(e){
+    // 如果没有选中组件 在画布上点击时需要调用 e.preventDefault() 防止触发 drop 事件
     if(!curComponent.value || (curComponent.value.component != 'v-text' && curComponent.value != 'rect-shape')){
         e.preventDefault()
-        e.stopPropagation()
     }
 }
 

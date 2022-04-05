@@ -35,5 +35,19 @@ export const moduleComponent = {
         setComponentData(state, componentData = []) {
             state.componentData = reactive(componentData)
         },
+        deleteComponent(state, index){
+            if(index === undefined){
+                index = state.curComponentIndex
+            }
+
+            if(index == state.curComponentIndex){
+                state.curComponentIndex = null
+                state.curComponent = null
+            }
+
+            if(/\d/.test(index)){
+                state.componentData.splice(index, 1)
+            }
+        }
     },
 };

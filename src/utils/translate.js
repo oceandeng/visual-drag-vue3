@@ -109,10 +109,22 @@ export function getCenterPoint(p1, p2) {
     }
 }
 
+export function sin(rotate) {
+    return Math.abs(Math.sin(angleToRadian(rotate)));
+}
+
+export function cos(rotate) {
+    return Math.abs(Math.cos(angleToRadian(rotate)));
+}
+
 export function changeStyleWithScale(value, scale) {
     return (value * parseInt(scale)) / 100;
 }
 
 export function mod360(deg) {
     return (deg + 360) % 360;
+}
+
+export function toPercent(val) {
+    return val * 100 + "%";
 }

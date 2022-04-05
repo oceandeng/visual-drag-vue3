@@ -1,5 +1,5 @@
 <template>
-    <div v-if="show" class="modal-bg" @click="hide">
+    <div v-if="modelValue" class="modal-bg" @click="hide">
         <div class="fadeInLeft animated modal" @click="stopPropagation">
             <slot></slot>
         </div>
@@ -7,22 +7,26 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, defineEmits } from "vue";
 
 const props = defineProps({
-    show: {
+    modelValue: {
         type: Boolean,
         default: false,
     },
 });
 
+const emit = defineEmits()
+
 function hide() {
-    this.$emit("change");
+    emit("update:modelValue");
 }
 
 function stopPropagation(e) {
     e.stopPropagation();
 }
+
+
 </script>
 
 <style lang="scss" scoped>
