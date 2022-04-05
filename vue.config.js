@@ -3,6 +3,7 @@ const resolve = (dir) => path.join(__dirname, dir);
 const { defineConfig } = require("@vue/cli-service");
 
 module.exports = defineConfig({
+    publicPath: './',
     transpileDependencies: true,
     devServer: {
         port: 3000,
